@@ -16,7 +16,7 @@ import org.liaohailong.cameralibrary.camera.CameraOptCallback;
 import org.liaohailong.cameralibrary.camera.CameraOptCallbackAdapter;
 import org.liaohailong.cameralibrary.camera.CameraUtil;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     private static final String mSavePath = Environment.getExternalStorageDirectory() + "/" + "camera_test";//相机拍照/录像缓存路径
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setAutoFocus(true)//默认开启，3秒一次对焦
                     .setCameraOptCallback(mCameraOptCallback)//相机操作回调
                     .setDirectoryPath(mSavePath)//缓存路径
+                    .setFlashEnable(true)//是否开启闪光灯拍照
                     .build();
         }
     }

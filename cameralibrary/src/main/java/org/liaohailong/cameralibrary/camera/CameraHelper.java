@@ -88,6 +88,7 @@ public final class CameraHelper {
             }
         }
     };
+    private String mFlashMode = Camera.Parameters.FLASH_MODE_OFF;//默认取消闪光灯
 
     //视频录制相关
     private boolean isRecording = false;
@@ -197,6 +198,39 @@ public final class CameraHelper {
         stopAutoFocus();
         mAutoFocusRunnable.run();
         startAutoFocus();
+    }
+
+    /**
+     * @return 最大缩放值
+     */
+    public int getMaxZoomSize() {
+        if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (parameters.isZoomSupported()) {
+                return parameters.getMaxZoom();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * @param value 缩放量
+     */
+    public void zoom(int value) {
+        if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (parameters.isZoomSupported()) {
+                int maxZoom = parameters.getMaxZoom();
+                value = value < 0 ? 0 : value;
+                value = value > maxZoom ? maxZoom : value;
+                parameters.setZoom(value);
+                try {
+                    mCamera.setParameters(parameters);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
@@ -371,6 +405,10 @@ public final class CameraHelper {
             if (isSupportFocus(Camera.Parameters.FOCUS_MODE_AUTO)) {
                 mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             }
+            //闪光灯模式
+            if (isSupportFlashMode(mFlashMode)) {
+                mParameters.setFlashMode(mFlashMode);
+            }
 
             camera.setParameters(mParameters);
         } catch (Exception ex) {
@@ -436,6 +474,20 @@ public final class CameraHelper {
         List<String> supportedFocusModes = mParameters.getSupportedFocusModes();
         for (String supportedFocusMode : supportedFocusModes) {
             if (TextUtils.equals(focusMode, supportedFocusMode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param flashMode 闪光灯模式
+     * @return 是否支持
+     */
+    private boolean isSupportFlashMode(String flashMode) {
+        List<String> supportedFlashModes = mParameters.getSupportedFlashModes();
+        for (String supportedFlashMode : supportedFlashModes) {
+            if (TextUtils.equals(flashMode, supportedFlashMode)) {
                 return true;
             }
         }
@@ -539,6 +591,7 @@ public final class CameraHelper {
         private CameraOptCallback cameraOptCallback;
         private boolean isAutoFocus = true;
         private boolean logEnable = true;
+        private String flashMode = Camera.Parameters.FLASH_MODE_OFF;//默认取消闪光灯
 
         public final Builder setActivity(Activity activity) {
             this.activity = new WeakReference<>(activity);
@@ -585,6 +638,11 @@ public final class CameraHelper {
             return this;
         }
 
+        public final Builder setFlashEnable(boolean flashOn) {
+            this.flashMode = flashOn ? Camera.Parameters.FLASH_MODE_ON : Camera.Parameters.FLASH_MODE_OFF;
+            return this;
+        }
+
         public CameraHelper build() {
             if (activity == null) {
                 throw new IllegalArgumentException("activity can not be empty");
@@ -605,6 +663,7 @@ public final class CameraHelper {
             cameraHelper.mCameraOptCallback = cameraOptCallback;
             cameraHelper.isAutoFocus = isAutoFocus;
             cameraHelper.logEnable = logEnable;
+            cameraHelper.mFlashMode = flashMode;
             return cameraHelper;
         }
     }
