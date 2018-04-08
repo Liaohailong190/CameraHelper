@@ -234,6 +234,53 @@ public final class CameraHelper {
     }
 
     /**
+     * 开启闪光灯模式
+     */
+    public boolean flashOn() {
+        if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (isSupportFlashMode(Camera.Parameters.FLASH_MODE_ON)) {
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+                try {
+                    mCamera.setParameters(parameters);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * 关闭闪光灯模式
+     */
+    public void flashOff() {
+        if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            try {
+                mCamera.setParameters(parameters);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * @return 闪光灯是否已开启
+     */
+    public boolean isFlashOn() {
+        if (mCamera != null) {
+            String flashMode = mCamera.getParameters().getFlashMode();
+            return TextUtils.equals(flashMode, Camera.Parameters.FLASH_MODE_ON);
+        }
+        return false;
+    }
+
+    /**
      * @return 当前是否正在录制
      */
     public boolean isRecording() {
@@ -486,6 +533,9 @@ public final class CameraHelper {
      */
     private boolean isSupportFlashMode(String flashMode) {
         List<String> supportedFlashModes = mParameters.getSupportedFlashModes();
+        if (supportedFlashModes == null) {
+            return false;
+        }
         for (String supportedFlashMode : supportedFlashModes) {
             if (TextUtils.equals(flashMode, supportedFlashMode)) {
                 return true;

@@ -18,11 +18,11 @@ import org.liaohailong.cameralibrary.camera.CameraUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-
     private static final String mSavePath = Environment.getExternalStorageDirectory() + "/" + "camera_test";//相机拍照/录像缓存路径
     private SurfaceView mSurfaceView;//预览界面
     private ImageView mImageView;//拍照图片展示
     private Button mRecordBtn;//录制按钮
+    private Button mFlashBtn;//闪光灯按钮
 
     //相机操作类
     private CameraHelper mCameraHelper;
@@ -50,14 +50,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mImageView = findViewById(R.id.avatar_img);
         View switchBtn = findViewById(R.id.switch_btn);
         View shotBtn = findViewById(R.id.shot_btn);
+        mFlashBtn = findViewById(R.id.flash_btn);
         mRecordBtn = findViewById(R.id.record_btn);
         resetRecordStatus();
+        resetFlashStatus();
 
         mSurfaceView.setOnClickListener(this);
         mImageView.setOnClickListener(this);
         switchBtn.setOnClickListener(this);
         shotBtn.setOnClickListener(this);
         mRecordBtn.setOnClickListener(this);
+        mFlashBtn.setOnClickListener(this);
 
         initCamera();
     }
@@ -67,6 +70,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void resetRecordStatus() {
         mRecordBtn.setText("开始录像");
+    }
+
+    /**
+     * 重置闪光灯按钮的状态
+     */
+    private void resetFlashStatus() {
+        if (mCameraHelper != null) {
+            mFlashBtn.setText(mCameraHelper.isFlashOn() ? "关闭闪关灯" : "打开闪关灯");
+        }
     }
 
     /**
@@ -81,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setAutoFocus(true)//默认开启，3秒一次对焦
                     .setCameraOptCallback(mCameraOptCallback)//相机操作回调
                     .setDirectoryPath(mSavePath)//缓存路径
-                    .setFlashEnable(true)//是否开启闪光灯拍照
+                    .setFlashEnable(false)//是否开启闪光灯拍照
                     .build();
         }
     }
@@ -128,6 +140,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (mCameraHelper != null) {
                     mCameraHelper.switchCamera();
                     resetRecordStatus();
+                    resetFlashStatus();
+                }
+                break;
+            case R.id.flash_btn://打开/关闭闪光灯
+                if (mCameraHelper != null) {
+                    if (mCameraHelper.isFlashOn()) {
+                        mCameraHelper.flashOff();
+                    } else {
+                        mCameraHelper.flashOn();
+                    }
+                    resetFlashStatus();
                 }
                 break;
             case R.id.shot_btn://拍照
