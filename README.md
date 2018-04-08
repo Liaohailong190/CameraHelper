@@ -2,6 +2,8 @@
 easy to use camera
 
 Step 1: 添加权限 AndroidManifest.xml 和设置主题
+
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -12,6 +14,8 @@ Step 1: 添加权限 AndroidManifest.xml 和设置主题
     <item name="android:windowFullscreen">true</item>
    
 Step 2:Activity->onCreate方法中初始化CameraHelper和回调接口
+
+
     //相机操作类
     private CameraHelper mCameraHelper;
     //相机操作数据回调
@@ -38,6 +42,8 @@ Step 2:Activity->onCreate方法中初始化CameraHelper和回调接口
                     .build();
                     
 Step 3:设置Activity生命周期相关回调
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -74,6 +80,8 @@ Step 3:设置Activity生命周期相关回调
     }
     
 Step 4:调用接口
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
