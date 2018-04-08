@@ -1,6 +1,11 @@
 # CameraHelper
 easy to use camera
 
+依赖相关
+总工程添加  maven { url 'https://jitpack.io' }
+主模块添加  implementation 'com.github.Liaohailong190:CameraHelper:v1.0'
+
+
 Step 1: 添加权限 AndroidManifest.xml 和设置主题
 
 
