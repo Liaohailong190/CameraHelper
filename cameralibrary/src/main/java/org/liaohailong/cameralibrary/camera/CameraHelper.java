@@ -1,6 +1,8 @@
 package org.liaohailong.cameralibrary.camera;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -8,9 +10,12 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -89,6 +94,7 @@ public final class CameraHelper {
         }
     };
     private String mFlashMode = Camera.Parameters.FLASH_MODE_OFF;//默认取消闪光灯
+    private boolean isScaleEnable = true;//是否支持变焦缩放
 
     //视频录制相关
     private boolean isRecording = false;
@@ -120,6 +126,44 @@ public final class CameraHelper {
                 onStop();
             }
         });
+        initGestureDetector(activity.getApplicationContext());
+    }
+
+    private void initGestureDetector(Context context) {
+        if (isScaleEnable) {
+            final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
+                @Override
+                public boolean onScale(ScaleGestureDetector detector) {
+                    float scaleFactor = detector.getScaleFactor();
+                    int maxZoomSize = getMaxZoomSize();
+                    int currentZoom = getCurrentZoom();
+                    float scale = scaleFactor - 1;
+                    int scaleZoom = currentZoom + (int) (maxZoomSize * scale);
+                    scaleZoom = scaleZoom < 0 ? 0 : scaleZoom;
+                    scaleZoom = scaleZoom > maxZoomSize ? maxZoomSize : scaleZoom;
+                    zoom(scaleZoom);
+                    return true;
+                }
+
+                @Override
+                public boolean onScaleBegin(ScaleGestureDetector detector) {
+                    return true;
+                }
+
+                @Override
+                public void onScaleEnd(ScaleGestureDetector detector) {
+
+                }
+            });
+            mSurfaceView.setOnTouchListener(new View.OnTouchListener() {
+                @SuppressLint("ClickableViewAccessibility")
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    int pointerCount = event.getPointerCount();//单点时将事件传递给onClick ↓
+                    return pointerCount > 1 ? scaleGestureDetector.onTouchEvent(event) : false;
+                }
+            });
+        }
     }
 
     private void log(String msg) {
@@ -203,7 +247,7 @@ public final class CameraHelper {
     /**
      * @return 最大缩放值
      */
-    public int getMaxZoomSize() {
+    private int getMaxZoomSize() {
         if (mCamera != null) {
             Camera.Parameters parameters = mCamera.getParameters();
             if (parameters.isZoomSupported()) {
@@ -214,9 +258,19 @@ public final class CameraHelper {
     }
 
     /**
+     * @return 当前缩放级别
+     */
+    private int getCurrentZoom() {
+        if (mCamera != null) {
+            return mCamera.getParameters().getZoom();
+        }
+        return 0;
+    }
+
+    /**
      * @param value 缩放量
      */
-    public void zoom(int value) {
+    private void zoom(int value) {
         if (mCamera != null) {
             Camera.Parameters parameters = mCamera.getParameters();
             if (parameters.isZoomSupported()) {
@@ -249,7 +303,6 @@ public final class CameraHelper {
                 }
                 return true;
             }
-            return false;
         }
         return false;
     }
@@ -642,6 +695,7 @@ public final class CameraHelper {
         private boolean isAutoFocus = true;
         private boolean logEnable = true;
         private String flashMode = Camera.Parameters.FLASH_MODE_OFF;//默认取消闪光灯
+        private boolean isScaleEnable = true;//是否支持变焦缩放
 
         public final Builder setActivity(Activity activity) {
             this.activity = new WeakReference<>(activity);
@@ -693,6 +747,11 @@ public final class CameraHelper {
             return this;
         }
 
+        public final Builder setScaleEnable(boolean scaleEnable) {
+            isScaleEnable = scaleEnable;
+            return this;
+        }
+
         public CameraHelper build() {
             if (activity == null) {
                 throw new IllegalArgumentException("activity can not be empty");
@@ -714,6 +773,7 @@ public final class CameraHelper {
             cameraHelper.isAutoFocus = isAutoFocus;
             cameraHelper.logEnable = logEnable;
             cameraHelper.mFlashMode = flashMode;
+            cameraHelper.isScaleEnable = isScaleEnable;
             return cameraHelper;
         }
     }

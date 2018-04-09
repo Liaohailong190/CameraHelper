@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setCameraOptCallback(mCameraOptCallback)//相机操作回调
                     .setDirectoryPath(mSavePath)//缓存路径
                     .setFlashEnable(false)//是否开启闪光灯拍照
+                    .setScaleEnable(true)//是否支持手势缩放
                     .build();
         }
     }

@@ -43,12 +43,14 @@ Step 2:Activity->onCreate方法中初始化CameraHelper和回调接口
         }
     };
     mCameraHelper = new CameraHelper.Builder()
-                    .setActivity(this)
-                    .setSurfaceView(mSurfaceView)
-                    .setAutoFocus(true)//默认开启，3秒一次对焦
-                    .setCameraOptCallback(mCameraOptCallback)//相机操作回调
-                    .setDirectoryPath(mSavePath)//缓存路径
-                    .build();
+                        .setActivity(this)
+                        .setSurfaceView(mSurfaceView)
+                        .setAutoFocus(true)//默认开启，3秒一次对焦
+                        .setCameraOptCallback(mCameraOptCallback)//相机操作回调
+                        .setDirectoryPath(mSavePath)//缓存路径
+                        .setFlashEnable(false)//是否开启闪光灯拍照
+                        .setScaleEnable(true)//是否支持手势缩放
+                        .build();
                     
 Step 3:设置Activity生命周期相关回调
 
@@ -91,37 +93,47 @@ Step 3:设置Activity生命周期相关回调
 Step 4:调用接口
 
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.surface_view://手动对焦
-                if (mCameraHelper != null) {
-                    mCameraHelper.focus();
-                }
-                break;
-            case R.id.switch_btn://切换前后置摄像头
-                if (mCameraHelper != null) {
-                    mCameraHelper.switchCamera();
-                    resetRecordStatus();
-                }
-                break;
-            case R.id.shot_btn://拍照
-                if (mCameraHelper != null) {
-                    mCameraHelper.takePicture();
-                }
-                break;
-            case R.id.record_btn://录像
-                if (mCameraHelper != null) {
-                    if (mCameraHelper.isRecording()) {
-                        mCameraHelper.stopRecorder();
-                        mRecordBtn.setText("开始录像");
-                    } else {
-                        if (mCameraHelper.startRecorder()) {
-                            mRecordBtn.setText("结束录像");
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.surface_view://手动对焦
+                    if (mCameraHelper != null) {
+                        mCameraHelper.focus();
+                    }
+                    break;
+                case R.id.avatar_img://重置预览图
+                    if (mImageView != null) {
+                        mImageView.setImageBitmap(null);
+                    }
+                    break;
+                case R.id.switch_btn://切换前后置摄像头
+                    if (mCameraHelper != null) {
+                        mCameraHelper.switchCamera();
+                    }
+                    break;
+                case R.id.flash_btn://打开/关闭闪光灯
+                    if (mCameraHelper != null) {
+                        if (mCameraHelper.isFlashOn()) {
+                            mCameraHelper.flashOff();
+                        } else {
+                            mCameraHelper.flashOn();
                         }
                     }
-                }
-                break;
+                    break;
+                case R.id.shot_btn://拍照
+                    if (mCameraHelper != null) {
+                        mCameraHelper.takePicture();
+                    }
+                    break;
+                case R.id.record_btn://录像
+                    if (mCameraHelper != null) {
+                        if (mCameraHelper.isRecording()) {
+                            mCameraHelper.stopRecorder();
+                        } else {
+                            mCameraHelper.startRecorder();
+                        }
+                    }
+                    break;
+            }
         }
-    }
     
